@@ -1,0 +1,41 @@
+rrb:
+  channels:
+    logging: logging:log
+    categoryCreated: "events:category-created"
+    categoryDeleted: "events:category-deleted"
+    categoryMappingCreated: "events:category-mapping-created"
+    categoryMappingDeleted: "events:category-mapping-deleted"
+    maximumChanged: "events:category-maximum-changed"
+    memeEdited: "events:edit"
+
+  queues:
+    categoriesCreate: "categories:create"
+    categoriesDelete: "categories:delete"
+    categoriesList: "categories:list"
+    categoriesCreateMapping: "categories:create-mapping"
+    categoriesDeleteMapping: "categories:delete-mapping"
+    categoriesMappings: "categories:mappings"
+    categoriesGet: "categories:get"
+    categoriesSet: "categories:set"
+    categoriesAdd: "categories:add"
+    categoriesRemove: "categories:remove"
+    categoriesValidate: "categories:validate"
+    categoriesGetOrSetMaximum: "categories:maximum"
+
+    
+
+redis: # The redis config to use
+  prefix: "mh:test:"
+  port: 6379
+  host: 127.0.0.1
+
+keyCategories: state:categories
+keyMaximum: state:categories:maximum
+keyMappings: state:categories:mappings
+
+mongodb:
+  connection: "<Your mongo db connection string>"
+  database: "test"
+  collections:
+    memes: memes
+    
