@@ -6,7 +6,7 @@ module.exports.build = function build(config, redis, memes, publishers) {
         if (typeof newMaximum !== 'number' || oldMaximum === newMaximum)
             return oldMaximum;
 
-        await redis.set(config.keyMaximum);
+        await redis.set(config.keyMaximum, newMaximum);
         await publishers.maximumChanged.publish(newMaximum);
         return newMaximum;
     }

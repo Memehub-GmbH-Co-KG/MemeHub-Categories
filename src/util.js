@@ -30,7 +30,7 @@ module.exports.validateCategories = function validateCategories(categoryOrCatego
  * Validates a category by removing invalid characters and norming it.
  * @param {*} category 
  */
-module.exports.validateCategory = function validateCategory(category) {
+const validateCategory = module.exports.validateCategory = function validateCategory(category) {
     const escaped = escapeCategory(category);
     return escaped ? normCategory(escaped) : null;
 }
@@ -47,7 +47,7 @@ module.exports.validateCategory = function validateCategory(category) {
  * loops would be to much work.
  * @param {string} category The category to norm
  */
-module.exports.normCategory = async function normCategory(category) {
+const normCategory = module.exports.normCategory = function normCategory(category) {
     // 1. Case correct
     const match = categories.find(c => category.localeCompare(c, undefined, { sensitivity: 'base' }) === 0)
     if (match)
@@ -66,7 +66,7 @@ module.exports.normCategory = async function normCategory(category) {
  * Returns null, if the category is not a string or contains no valid charactesrs.
  * @param {string} category The category to escape
  */
-module.exports.escapeCategory = function escapeCategory(category) {
+const escapeCategory = module.exports.escapeCategory = function escapeCategory(category) {
     if (!category) return null;
     if (typeof category !== 'string') return null;
     return category

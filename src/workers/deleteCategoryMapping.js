@@ -1,3 +1,4 @@
+const { setMappings } = require("../util");
 
 module.exports.build = function (config, redis, memes, publishers) {
 

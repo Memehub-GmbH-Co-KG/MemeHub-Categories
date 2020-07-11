@@ -1,7 +1,7 @@
 const { Worker, Publisher } = require('redis-request-broker');
 const Redis = require('ioredis');
 const MongoClient = require('mongodb').MongoClient;
-const { validateCategories } = require('./util');
+const { validateCategories, setCategoires, setMappings } = require('./util');
 const { log } = require('./log');
 
 
@@ -48,6 +48,11 @@ module.exports.build = async function (config) {
         const maxIsNew = await redis.set(config.keyMaximum, 5, 'NX');
         if (maxIsNew)
             await publishers.maximumChanged.publish(5);
+
+        // Get initial state
+        setCategoires(await redis.smembers(config.keyCategories));
+        setMappings(await redis.hgetall(config.keyMappings));
+
 
     }
     catch (error) {

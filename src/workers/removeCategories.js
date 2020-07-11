@@ -13,12 +13,17 @@ module.exports.build = function (config, redis, memes, publishers) {
             return false;
 
         // Update categories
-        const result = await memes.updateOne({ _id: id }, { $pull: { categories: { $in: categories } } });
-        if (result.modifiedCount < 1)
+        const result = await memes.findOneAndUpdate({ _id: meme_id }, { $pull: { categories: { $in: categories } } }, {
+            projection: {
+                group_message_id: 1
+            }
+        });
+
+        if (!result.value)
             return false;
 
         // Emit event and return
-        await publishers.edit.publish(meme_id);
+        await publishers.edit.publish({ meme_id, in_group: !!result.value.group_message_id });
         return true;
     }
 
