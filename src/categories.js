@@ -1,7 +1,7 @@
 const { Worker, Publisher } = require('redis-request-broker');
 const Redis = require('ioredis');
 const MongoClient = require('mongodb').MongoClient;
-const { validateCategories, setRedis } = require('./util');
+const { validateCategories } = require('./util');
 const { log } = require('./log');
 
 
@@ -12,8 +12,6 @@ module.exports.build = async function (config) {
     let redis = new Redis(config.redis);
     let mongoClient;
     let memes;
-    setRedis(redis);
-
     try {
         // Connect to mongodb
         mongoClient = new MongoClient(config.mongodb.connection, { useNewUrlParser: true, useUnifiedTopology: true });
