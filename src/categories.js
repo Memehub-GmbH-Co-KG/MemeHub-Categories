@@ -65,6 +65,7 @@ module.exports.build = async function (config) {
                 await p.disconnect().catch(e => log('warning', 'Failed to stop MemeHub-Categories', e));
 
             await redis.quit();
+            await mongoClient.close();
         }
         catch (error) {
             await log('warning', 'Failed to stop MemeHub-Categories', error);

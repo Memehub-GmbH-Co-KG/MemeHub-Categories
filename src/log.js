@@ -3,9 +3,8 @@ const i = require('./instance');
 let client;
 
 module.exports.start = async function start(config) {
-    const c = new Publisher(config.rrb.channels.logging);
-    await c.connect();
-    client = c;
+    client = new Publisher(config.rrb.channels.logging);
+    await client.connect();
 }
 
 module.exports.stop = async function stop() {

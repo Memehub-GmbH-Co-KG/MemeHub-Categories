@@ -1,9 +1,10 @@
-
+const { Defaults } = require('redis-request-broker');
 const log = require('./src/log');
 const _categories = require('./src/categories');
 const yaml = require('js-yaml');
 const fs = require('fs');
 let categories;
+let shuttingDown = false;
 
 async function start() {
     console.log("Starting up...");
@@ -18,6 +19,12 @@ async function start() {
         process.exit(1);
     }
 
+    // Set rrb defaults
+    Defaults.setDefaults({
+        redis: config.redis
+    });
+
+
     try {
         await log.start(config);
         categories = await _categories.build(config);
@@ -30,6 +37,10 @@ async function start() {
 }
 
 async function stop() {
+    if (shuttingDown)
+        return;
+    shuttingDown = true;
+
     try {
         await log.log('notice', 'Shutting down...');
         if (categories)
@@ -40,7 +51,13 @@ async function stop() {
     catch (error) {
         log.log('warning', 'Error during shutdown', error);
     }
+    finally {
+        shuttingDown = false;
+    }
 
 }
 
 start();
+process.on('SIGINT', stop);
+process.on('SIGQUIT', stop);
+process.on('SIGTERM', stop);
