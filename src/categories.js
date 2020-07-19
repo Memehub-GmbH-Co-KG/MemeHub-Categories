@@ -25,6 +25,7 @@ module.exports.build = async function (config) {
         publishers.categoryMappingDeleted = new Publisher(config.rrb.channels.categoryMappingDeleted);
         publishers.edit = new Publisher(config.rrb.channels.memeEdited);
         publishers.maximumChanged = new Publisher(config.rrb.channels.maximumChanged);
+        publishers.columnsChanged = new Publisher(config.rrb.channels.columnsChanged);
         workers.create = new Worker(config.rrb.queues.categoriesCreate, require('./workers/createCategory').build(config, redis, memes, publishers));
         workers.delete = new Worker(config.rrb.queues.categoriesDelete, require('./workers/deleteCategory').build(config, redis, memes, publishers));
         workers.list = new Worker(config.rrb.queues.categoriesList, require('./workers/listCategories').build(config, redis, memes, publishers));
@@ -36,6 +37,7 @@ module.exports.build = async function (config) {
         workers.add = new Worker(config.rrb.queues.categoriesAdd, require('./workers/addCategories').build(config, redis, memes, publishers));
         workers.remove = new Worker(config.rrb.queues.categoriesRemove, require('./workers/removeCategories').build(config, redis, memes, publishers));
         workers.maximum = new Worker(config.rrb.queues.categoriesGetOrSetMaximum, require('./workers/getOrSetMaximum').build(config, redis, memes, publishers));
+        workers.columns = new Worker(config.rrb.queues.categoriesGetOrSetColumns, require('./workers/getOrSetColumns').build(config, redis, memes, publishers));
         workers.validate = new Worker(config.rrb.queues.categoriesValidate, async data => validateCategories(data));
 
         for (const w of Object.values(workers))
@@ -48,6 +50,10 @@ module.exports.build = async function (config) {
         const maxIsNew = await redis.set(config.keyMaximum, 5, 'NX');
         if (maxIsNew)
             await publishers.maximumChanged.publish(5);
+
+        const colIsNew = await redis.set(config.keyColumns, 4, 'NX');
+        if (colIsNew)
+            await publishers.columnsChanged.publish(4);
 
         // Get initial state
         setCategoires(await redis.smembers(config.keyCategories));

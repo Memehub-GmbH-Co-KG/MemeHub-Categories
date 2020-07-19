@@ -6,6 +6,7 @@ rrb:
     categoryMappingCreated: "events:category-mapping-created"
     categoryMappingDeleted: "events:category-mapping-deleted"
     maximumChanged: "events:category-maximum-changed"
+    columnsChanged: "events:category-columns-changed"
     memeEdited: "events:edit"
 
   queues:
@@ -21,6 +22,7 @@ rrb:
     categoriesRemove: "categories:remove"
     categoriesValidate: "categories:validate"
     categoriesGetOrSetMaximum: "categories:maximum"
+    categoriesGetOrSetColumns: "categories:columns"
 
     
 
@@ -30,8 +32,9 @@ redis: # The redis config to use
   host: 127.0.0.1
 
 keyCategories: state:categories
-keyMaximum: state:categories:maximum
 keyMappings: state:categories:mappings
+keyMaximum: state:categories:maximum
+keyColumns: state:categories:columns
 
 mongodb:
   connection: "<Your mongo db connection string>"
