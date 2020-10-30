@@ -1,4 +1,4 @@
-const { Defaults, Subscriber } = require('redis-request-broker');
+const { Defaults, Subscriber, Client } = require('redis-request-broker');
 const log = require('./src/log');
 const _categories = require('./src/categories');
 let categories;
@@ -13,7 +13,7 @@ async function start() {
         redis: {
             prefix: "mh:",
             port: 6379,
-            host: "127.0.0.1",
+            host: "mhredis",
         }
     });
 

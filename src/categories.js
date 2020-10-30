@@ -16,7 +16,7 @@ module.exports.build = async function (config) {
         // Connect to mongodb
         mongoClient = new MongoClient(config.mongodb.connection, { useNewUrlParser: true, useUnifiedTopology: true });
         await mongoClient.connect();
-        memes = await mongoClient.db(config.mongodb.database).createCollection(config.mongodb.collections.memes);
+        memes = await mongoClient.db(config.mongodb.database).collection(config.mongodb.collections.memes);
 
         // Create workers and publisher
         publishers.created = new Publisher(config.rrb.channels.categoryCreated);
