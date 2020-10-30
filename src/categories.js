@@ -9,7 +9,7 @@ module.exports.build = async function (config) {
 
     let workers = {};
     let publishers = {};
-    let redis = new Redis(config.redis);
+    let redis = new Redis(config.redis.connection);
     let mongoClient;
     let memes;
     try {
@@ -21,24 +21,24 @@ module.exports.build = async function (config) {
         // Create workers and publisher
         publishers.created = new Publisher(config.rrb.channels.categoryCreated);
         publishers.deleted = new Publisher(config.rrb.channels.categoryDeleted);
-        publishers.categoryMappingCreated = new Publisher(config.rrb.channels.categoryMappingCreated);
-        publishers.categoryMappingDeleted = new Publisher(config.rrb.channels.categoryMappingDeleted);
-        publishers.edit = new Publisher(config.rrb.channels.memeEdited);
-        publishers.maximumChanged = new Publisher(config.rrb.channels.maximumChanged);
-        publishers.columnsChanged = new Publisher(config.rrb.channels.columnsChanged);
-        workers.create = new Worker(config.rrb.queues.categoriesCreate, require('./workers/createCategory').build(config, redis, memes, publishers));
-        workers.delete = new Worker(config.rrb.queues.categoriesDelete, require('./workers/deleteCategory').build(config, redis, memes, publishers));
-        workers.list = new Worker(config.rrb.queues.categoriesList, require('./workers/listCategories').build(config, redis, memes, publishers));
-        workers.createMapping = new Worker(config.rrb.queues.categoriesCreateMapping, require('./workers/createCategoryMapping').build(config, redis, memes, publishers));
-        workers.deleteMapping = new Worker(config.rrb.queues.categoriesDeleteMapping, require('./workers/deleteCategoryMapping').build(config, redis, memes, publishers));
-        workers.mappings = new Worker(config.rrb.queues.categoriesMappings, require('./workers/mappings').build(config, redis, memes, publishers));
-        workers.get = new Worker(config.rrb.queues.categoriesGet, require('./workers/getCategories').build(config, redis, memes, publishers));
-        workers.set = new Worker(config.rrb.queues.categoriesSet, require('./workers/setCategories').build(config, redis, memes, publishers));
-        workers.add = new Worker(config.rrb.queues.categoriesAdd, require('./workers/addCategories').build(config, redis, memes, publishers));
-        workers.remove = new Worker(config.rrb.queues.categoriesRemove, require('./workers/removeCategories').build(config, redis, memes, publishers));
-        workers.maximum = new Worker(config.rrb.queues.categoriesGetOrSetMaximum, require('./workers/getOrSetMaximum').build(config, redis, memes, publishers));
-        workers.columns = new Worker(config.rrb.queues.categoriesGetOrSetColumns, require('./workers/getOrSetColumns').build(config, redis, memes, publishers));
-        workers.validate = new Worker(config.rrb.queues.categoriesValidate, async data => validateCategories(data));
+        publishers.categoryMappingCreated = new Publisher(config.rrb.channels.categories.mappingCreated);
+        publishers.categoryMappingDeleted = new Publisher(config.rrb.channels.categories.mappingDeleted);
+        publishers.edit = new Publisher(config.rrb.channels.meme.edited);
+        publishers.maximumChanged = new Publisher(config.rrb.channels.categories.maximumChanged);
+        publishers.columnsChanged = new Publisher(config.rrb.channels.categories.columnsChanged);
+        workers.create = new Worker(config.rrb.channels.categories.create, require('./workers/createCategory').build(config, redis, memes, publishers));
+        workers.delete = new Worker(config.rrb.channels.categories.delete, require('./workers/deleteCategory').build(config, redis, memes, publishers));
+        workers.list = new Worker(config.rrb.channels.categories.list, require('./workers/listCategories').build(config, redis, memes, publishers));
+        workers.createMapping = new Worker(config.rrb.channels.categories.createMapping, require('./workers/createCategoryMapping').build(config, redis, memes, publishers));
+        workers.deleteMapping = new Worker(config.rrb.channels.categories.deleteMapping, require('./workers/deleteCategoryMapping').build(config, redis, memes, publishers));
+        workers.mappings = new Worker(config.rrb.channels.categories.mappings, require('./workers/mappings').build(config, redis, memes, publishers));
+        workers.get = new Worker(config.rrb.channels.categories.get, require('./workers/getCategories').build(config, redis, memes, publishers));
+        workers.set = new Worker(config.rrb.channels.categories.set, require('./workers/setCategories').build(config, redis, memes, publishers));
+        workers.add = new Worker(config.rrb.channels.categories.add, require('./workers/addCategories').build(config, redis, memes, publishers));
+        workers.remove = new Worker(config.rrb.channels.categories.remove, require('./workers/removeCategories').build(config, redis, memes, publishers));
+        workers.maximum = new Worker(config.rrb.channels.categories.getOrSetMaximum, require('./workers/getOrSetMaximum').build(config, redis, memes, publishers));
+        workers.columns = new Worker(config.rrb.channels.categories.getOrSetColumns, require('./workers/getOrSetColumns').build(config, redis, memes, publishers));
+        workers.validate = new Worker(config.rrb.channels.categories.validate, async data => validateCategories(data));
 
         for (const w of Object.values(workers))
             await w.listen();
@@ -47,17 +47,17 @@ module.exports.build = async function (config) {
             await p.connect();
 
         // Set defaults
-        const maxIsNew = await redis.set(config.keyMaximum, 5, 'NX');
+        const maxIsNew = await redis.set(config.redis.keys.maximum, 5, 'NX');
         if (maxIsNew)
             await publishers.maximumChanged.publish(5);
 
-        const colIsNew = await redis.set(config.keyColumns, 4, 'NX');
+        const colIsNew = await redis.set(config.redis.keys.columns, 4, 'NX');
         if (colIsNew)
             await publishers.columnsChanged.publish(4);
 
         // Get initial state
-        setCategoires(await redis.smembers(config.keyCategories));
-        setMappings(await redis.hgetall(config.keyMappings));
+        setCategoires(await redis.smembers(config.redis.keys.categories));
+        setMappings(await redis.hgetall(config.redis.keys.mappings));
 
 
     }

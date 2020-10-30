@@ -5,8 +5,8 @@ module.exports.build = function (config, redis, memes, publishers) {
     async function deleteCategoryMapping({ key }) {
 
         // Remove the mapping from the hset
-        const result = await redis.hdel(config.keyMappings, key);
-        const mappings = await redis.hgetall(config.keyMappings);
+        const result = await redis.hdel(config.redis.keys.mappings, key);
+        const mappings = await redis.hgetall(config.redis.keys.mappings);
 
         // Check if it has been deleted
         if (result < 1)

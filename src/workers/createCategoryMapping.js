@@ -5,8 +5,8 @@ module.exports.build = function (config, redis, memes, publishers) {
     async function createCategoryMapping({ key, category }) {
 
         // Add the mapping to the hset
-        const result = await redis.hset(config.keyMappings, key, category);
-        const mappings = await redis.hgetall(config.keyMappings);
+        const result = await redis.hset(config.redis.keys.mappings, key, category);
+        const mappings = await redis.hgetall(config.redis.keys.mappings);
 
         // Check if it has been created
         if (result < 1)

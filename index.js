@@ -1,29 +1,32 @@
-const { Defaults } = require('redis-request-broker');
+const { Defaults, Subscriber } = require('redis-request-broker');
 const log = require('./src/log');
 const _categories = require('./src/categories');
-const yaml = require('js-yaml');
-const fs = require('fs');
 let categories;
 let shuttingDown = false;
+let restartSubscriber;
 
 async function start() {
     console.log("Starting up...");
 
-    // Load config
-    let config;
-    try {
-        config = yaml.safeLoad(fs.readFileSync('config.yaml', 'utf8'));
-    } catch (e) {
-        console.error('Cannot load config file. Exiting.');
-        console.error(e);
-        process.exit(1);
-    }
-
     // Set rrb defaults
     Defaults.setDefaults({
-        redis: config.redis
+        redis: {
+            prefix: "mh:",
+            port: 6379,
+            host: "127.0.0.1",
+        }
     });
 
+    // Load config
+    const config = await getConfig().catch(e => {
+        console.error('Cannot load config. Exiting.');
+        console.error(e);
+        process.exit(1);
+    });
+
+    // Trigger restart on config change
+    restartSubscriber = new Subscriber(config.rrb.channels.config.changed, onConfigChange);
+    await restartSubscriber.listen();
 
     try {
         await log.start(config);
@@ -43,6 +46,7 @@ async function stop() {
 
     try {
         await log.log('notice', 'Shutting down...');
+        restartSubscriber && restartSubscriber.stop();
         if (categories)
             await categories.stop().catch(e => log.log('warning', 'Failed to stop categories', e));
         await log.stop();
@@ -54,7 +58,27 @@ async function stop() {
     finally {
         shuttingDown = false;
     }
+}
 
+async function restart() {
+    await stop();
+    await start();
+}
+
+async function onConfigChange(keys) {
+    if (!Array.isArray(keys))
+        restart();
+
+    if (keys.some(k => k.startsWith('redis') || k.startsWith('rrb') || k.startsWith('mongodb')))
+        restart();
+}
+
+async function getConfig() {
+    const client = new Client('config:get', { timeout: 10000 });
+    await client.connect();
+    const [redis, rrb, mongodb] = await client.request(['redis', 'rrb', 'mongodb']);
+    await client.disconnect();
+    return { redis, rrb, mongodb };
 }
 
 start();

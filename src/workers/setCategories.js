@@ -13,7 +13,7 @@ module.exports.build = function (config, redis, memes, publishers) {
             return false;
 
         // Check maximum
-        const maximum = await parseInt(redis.get(config.keyMaximum));
+        const maximum = await parseInt(redis.get(config.redis.keys.maximum));
         if (categories.length > maximum)
             return false
 
