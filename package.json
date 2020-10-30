@@ -14,7 +14,7 @@
     "docker-names": "^1.1.1",
     "ioredis": "^4.17.3",
     "js-yaml": "^3.14.0",
-    "mongodb": "^3.5.9",
+    "mongodb": "^3.6.2",
     "redis-request-broker": "^1.11.1"
   }
 }
