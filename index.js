@@ -11,9 +11,11 @@ async function start() {
     // Set rrb defaults
     Defaults.setDefaults({
         redis: {
-            prefix: "mh:",
-            port: 6379,
-            host: "mhredis",
+            prefix: process.env.REDIS_PREFIX || 'mh:',
+            host: process.env.REDIS_HOST || "mhredis",
+            port: process.env.REDIS_PORT || undefined,
+            db: process.env.REDIS_DB || undefined,
+            password: process.env.REDIS_PASSWORD || undefined
         }
     });
 
@@ -46,7 +48,7 @@ async function stop() {
 
     try {
         await log.log('notice', 'Shutting down...');
-        restartSubscriber && restartSubscriber.stop();
+        restartSubscriber && await restartSubscriber.stop().catch(console.error);
         if (categories)
             await categories.stop().catch(e => log.log('warning', 'Failed to stop categories', e));
         await log.stop();
